@@ -1,15 +1,11 @@
-name: Build nightly images
-on:
-  push:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 5' # Run every friday at midnight
+name: Build images
+on: [workflow_dispatch]
 
 jobs:
   build-image:
     strategy:
       matrix:
-        version: ["next", "v6.6.1"]
+        version: ["next", "v6.8"]
 
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +18,7 @@ jobs:
 
       - name: Install pmbootstrap from git
         run: |
-          git clone --depth=1 https://git.sr.ht/~postmarketos/pmbootstrap
+          git clone --depth=1 https://gitlab.com/postmarketOS/pmbootstrap.git
           mkdir -p ~/.local/bin
           ln -s "$PWD/pmbootstrap/pmbootstrap.py" ~/.local/bin/pmbootstrap
           pmbootstrap --version
@@ -71,55 +67,4 @@ jobs:
         with:
           name: xiaomi-davinci-${{ matrix.version }}
           path: out/*-davinci.img*
-          retention-days: 7
-
-      - name: Build xiaomi-surya
-        run: |
-          cp xiaomi-surya.cfg ~/.config/pmbootstrap.cfg
-          pmbootstrap install --password 147147
-          pmbootstrap export
-          cp /tmp/postmarketOS-export/boot.img out/boot-xiaomi-surya.img
-          cp /tmp/postmarketOS-export/xiaomi-surya.img out/rootfs-xiaomi-surya.img
-          xz -T0 -9e -v out/rootfs-xiaomi-surya.img
-          echo -e "n\nn\ny\n" | pmbootstrap zap
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xiaomi-surya-${{ matrix.version }}
-          path: out/*-surya.img*
-          retention-days: 7
-
-      - name: Build xiaomi-sweet
-        run: |
-          cp xiaomi-sweet.cfg ~/.config/pmbootstrap.cfg
-          pmbootstrap install --password 147147
-          pmbootstrap export
-          cp /tmp/postmarketOS-export/boot.img out/boot-xiaomi-sweet.img
-          cp /tmp/postmarketOS-export/xiaomi-sweet.img out/rootfs-xiaomi-sweet.img
-          xz -T0 -9e -v out/rootfs-xiaomi-sweet.img
-          echo -e "n\nn\ny\n" | pmbootstrap zap
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xiaomi-sweet-${{ matrix.version }}
-          path: out/*-sweet.img*
-          retention-days: 7
-
-      - name: Build xiaomi-toco
-        run: |
-          cp xiaomi-toco.cfg ~/.config/pmbootstrap.cfg
-          pmbootstrap install --password 147147
-          pmbootstrap export
-          cp /tmp/postmarketOS-export/boot.img out/boot-xiaomi-toco.img
-          cp /tmp/postmarketOS-export/xiaomi-toco.img out/rootfs-xiaomi-toco.img
-          xz -T0 -9e -v out/rootfs-xiaomi-toco.img
-          echo -e "n\nn\ny\n" | pmbootstrap zap
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xiaomi-toco-${{ matrix.version }}
-          path: out/*-toco.img*
           retention-days: 7
